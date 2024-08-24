@@ -16,7 +16,7 @@ jobs:
    #       path: example.txt
 
   test:
-    machine:
+    docker:
       image: taguniversalsoftware/digitalblockchain:latest
       docker_layer_caching: true
     steps:
@@ -27,7 +27,7 @@ jobs:
           command: mix test
   
   deploy:
-    machine:
+    docker:
       image: taguniversalsoftware/digitalblockchain:latest
       docker_layer_caching: true
     steps:
