@@ -12,13 +12,17 @@ jobs:
       - run:
           name: Build an artifact
           command: docker build -t taguniversalsoftware/digitalblockchain:latest .
+      - run:
+          name: Push Image to Docker Hub
+          command: |
+            docker push taguniversalsoftware/digitalblockchain:latest
    #   - store_artifacts:
    #       path: example.txt
 
   test:
     docker:
-      image: taguniversalsoftware/digitalblockchain:latest
-      docker_layer_caching: true
+      - image: taguniversalsoftware/digitalblockchain:latest
+
     steps:
       - checkout
       # Replace this with a real test runner invocation
@@ -28,8 +32,8 @@ jobs:
   
   deploy:
     docker:
-      image: taguniversalsoftware/digitalblockchain:latest
-      docker_layer_caching: true
+      - image: taguniversalsoftware/digitalblockchain:latest
+   
     steps:
       # Replace this with steps to deploy to users
       - run:
