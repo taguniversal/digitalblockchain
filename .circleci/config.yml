@@ -4,7 +4,7 @@ version: 2.1
 jobs: 
   build:
     machine:
-      image: ubuntu-2004:202104-01
+      image: ubuntu-2204:edge
       docker_layer_caching: true
     steps:
       - checkout
@@ -17,7 +17,7 @@ jobs:
 
   test:
     machine:
-      image: ubuntu-2004:202104-01
+      image: taguniversalsoftware/digitalblockchain:latest
       docker_layer_caching: true
     steps:
       - checkout
@@ -28,7 +28,7 @@ jobs:
   
   deploy:
     machine:
-      image: ubuntu-2004:202104-01
+      image: taguniversalsoftware/digitalblockchain:latest
       docker_layer_caching: true
     steps:
       # Replace this with steps to deploy to users
