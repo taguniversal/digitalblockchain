@@ -5,7 +5,7 @@ version: 2.1
 jobs:
   test:
     docker:
-      - image: taguniversalsoftware/digitalblockchain
+      - image: taguniversalsoftware/digitalblockchain:latest
     steps:
       - checkout
       # Replace this with a real test runner invocation
@@ -20,17 +20,17 @@ jobs:
       # Replace this with steps to build a package, or executable
       - run:
           name: Build an artifact
-          command: touch example.txt
-      - store_artifacts:
-          path: example.txt
+          command: mix compile
+   #   - store_artifacts:
+   #       path: example.txt
   deploy:
     docker:
-      - image: taguniversalsoftware/digitalblockchain
+      - image: taguniversalsoftware/digitalblockchain:latest
     steps:
       # Replace this with steps to deploy to users
       - run:
           name: deploy
-          command: '#e.g. ./deploy.sh'
+          command: mix release
 workflows:
   example:
     jobs:
