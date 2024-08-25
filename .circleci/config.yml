@@ -43,7 +43,7 @@ jobs:
       - run:
           name: Install Fly CLI
           command: |
-            curl -L https://fly.io/install.sh | sh
+            curl -v -L https://fly.io/install.sh | sh
             export FLYCTL_INSTALL="/root/.fly"
             export PATH="$FLYCTL_INSTALL/bin:$PATH"
       - run:
