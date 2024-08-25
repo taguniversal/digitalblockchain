@@ -2,12 +2,23 @@
 version: 2.1
 
 jobs: 
-  build_test:
+  test:
     machine:
       image: ubuntu-2204:edge
       docker_layer_caching: true
     steps:
       - checkout
+      - run:
+          name: Build test application
+          command: docker build -f Dockerfile.test .
+
+  build:
+    machine:
+      image: ubuntu-2204:edge
+      docker_layer_caching: true
+    steps:
+      - checkout
+
       # Replace this with steps to build a package, or executable
       - run:
           name: Build application
@@ -32,14 +43,17 @@ jobs:
       # Replace this with steps to deploy to users
       - run:
           name: deploy
-          command: mix release
+          command: docker run --rm taguniversalsoftware/digitalblockchain:latest fly deploy
 
 workflows:
   my-workflow:
     jobs:
-      - build_test
+      - test
+      - build:
+          requires:
+            - test
 
       - deploy:
           requires:
-            - build_test
+            - build
          
