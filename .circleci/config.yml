@@ -28,7 +28,7 @@ jobs:
       - image: taguniversalsoftware/digitalblockchain:latest
 
     steps:
-      - checkout
+    #  - checkout
       # Replace this with a real test runner invocation
       - run:
           name: Run tests
