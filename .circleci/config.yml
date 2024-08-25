@@ -13,6 +13,10 @@ jobs:
           name: Build an artifact
           command: docker build -t taguniversalsoftware/digitalblockchain:latest .
       - run:
+          name: Login to Docker Hub
+          command: |
+            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+      - run:
           name: Push Image to Docker Hub
           command: |
             docker push taguniversalsoftware/digitalblockchain:latest
