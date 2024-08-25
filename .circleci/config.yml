@@ -41,18 +41,14 @@ jobs:
       image: ubuntu-2204:edge
     steps:
       - run:
-          name: Install Fly CLI
+          name: Install Fly CLI, Auth and Deploy
           command: |
             curl -L https://fly.io/install.sh | sh
             export FLYCTL_INSTALL="/home/circleci/.fly"
             export PATH="$FLYCTL_INSTALL/bin:$PATH"
             export PATH="$FLYCTL_INSTALL/bin:$PATH"
-      - run:
-          name: Login to Fly.io
-          command: fly auth token ${FLY_API_TOKEN} # Assumes FLY_API_TOKEN is set in CircleCI environment variables
-      - run:
-          name: Deploy to Fly.io
-          command: fly deploy -a digitalblockchain -i taguniversalsoftware/digitalblockchain:latest
+            fly auth token ${FLY_API_TOKEN} # Assumes FLY_API_TOKEN is set in CircleCI environment variables
+            fly deploy -a digitalblockchain -i taguniversalsoftware/digitalblockchain:latest
 
 workflows:
   my-workflow:
