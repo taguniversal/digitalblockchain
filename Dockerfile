@@ -26,6 +26,7 @@ RUN apt-get update -y && apt-get install -y build-essential git make\
 
 # prepare build dir
 WORKDIR /app
+RUN mkdir -p /app
 
 # install hex + rebar
 RUN mix local.hex --force && \
