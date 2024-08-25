@@ -35,15 +35,23 @@ jobs:
    #       path: example.txt
 
   
+
   deploy:
-    docker:
-      - image: taguniversalsoftware/digitalblockchain:latest
-   
+    machine:
+      image: ubuntu-2204:edge
     steps:
-      # Replace this with steps to deploy to users
       - run:
-          name: deploy
-          command: docker run --rm taguniversalsoftware/digitalblockchain:latest fly deploy
+          name: Install Fly CLI
+          command: |
+            curl -L https://fly.io/install.sh | sh
+            export FLYCTL_INSTALL="/root/.fly"
+            export PATH="$FLYCTL_INSTALL/bin:$PATH"
+      - run:
+          name: Login to Fly.io
+          command: fly auth token ${FLY_API_TOKEN} # Assumes FLY_API_TOKEN is set in CircleCI environment variables
+      - run:
+          name: Deploy to Fly.io
+          command: fly deploy -a digitalblockchain -i taguniversalsoftware/digitalblockchain:latest
 
 workflows:
   my-workflow:
