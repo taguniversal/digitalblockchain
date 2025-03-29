@@ -21,7 +21,7 @@ ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 FROM ${BUILDER_IMAGE} as builder
 
 # install build dependencies
-RUN apt-get update -y && apt-get install -y build-essential git make\
+RUN apt-get update -y && apt-get install -y build-essential git make libssl-dev \ 
     && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # prepare build dir
@@ -69,6 +69,11 @@ RUN git clone https://github.com/taguniversalmachine/MKRAND-1.git /app/lib/c/MKR
 WORKDIR /app/lib/c/MKRAND-1
 RUN make -f src/Makefile.simple 
 
+# Build RC
+RUN git clone https://github.com/taguniversal/rc.git /app/lib/c/rc
+WORKDIR /app/lib/c/rc
+RUN make -f Makefile
+
 # start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
 FROM ${RUNNER_IMAGE}
@@ -97,6 +102,11 @@ ENV MIX_ENV="prod"
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/digitalblockchain ./
 
 COPY --from=builder --chown=nobody:root /app/lib/c/MKRAND-1/mkrand /usr/local/bin/
+
+# Install rc
+COPY --from=builder --chown=nobody:root /app/lib/c/rc/build/rc /usr/local/bin/
+COPY --from=builder --chown=nobody:root /app/lib/c/rc/inv/ /app/inv/
+
 
 USER nobody
 
