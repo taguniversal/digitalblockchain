@@ -36,7 +36,7 @@ if config_env() == :prod do
   host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
 
-  #Tigris
+  # Tigris
   config :ex_aws,
     debug_requests: true,
     json_codec: Jason,

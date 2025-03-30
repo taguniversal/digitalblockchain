@@ -3,5 +3,4 @@ defmodule DigitalBlockchain.Blockchain do
     blocks = GenServer.call(DigitalBlockchain.MKRAND, {:block, seed, num_blocks})
     blocks
   end
-
 end

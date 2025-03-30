@@ -21,7 +21,7 @@ ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 FROM ${BUILDER_IMAGE} as builder
 
 # install build dependencies
-RUN apt-get update -y && apt-get install -y build-essential git make libssl-dev \ 
+RUN apt-get update -y && apt-get install -y build-essential git make libssl-dev libc6-dev libsqlite3-dev\ 
     && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # prepare build dir
@@ -70,7 +70,7 @@ WORKDIR /app/lib/c/MKRAND-1
 RUN make -f src/Makefile.simple 
 
 # Build RC
-RUN git clone https://github.com/taguniversal/rc.git /app/lib/c/rc
+RUN git clone https://github.com/taguniversal/rc.git /app/lib/c/rc && echo "XX"
 WORKDIR /app/lib/c/rc
 RUN make -f Makefile
 
@@ -79,7 +79,7 @@ RUN make -f Makefile
 FROM ${RUNNER_IMAGE}
 
 RUN apt-get update -y && \
-  apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates \
+  apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates libsqlite3-0 \
   && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # Install fly CLI

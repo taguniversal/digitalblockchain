@@ -21,7 +21,6 @@ defmodule Digitalblockchain.RCPoller do
 
       {^port, {:exit_status, code}} ->
         {:error, %{code: code, output: acc}}
-
     after
       5_000 -> {:error, :timeout}
     end

@@ -25,7 +25,8 @@ defmodule DigitalblockchainWeb.Router do
     pipe_through :api
 
     get "/context/:subject", ContextController, :show
-    get "/metrics", MetricsController, :index   # 👈 Add this line
+    # 👈 Add this line
+    get "/metrics", MetricsController, :index
   end
 
   if Application.compile_env(:digitalblockchain, :dev_routes) do
