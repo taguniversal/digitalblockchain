@@ -50,6 +50,8 @@ if config_env() == :prod do
 
   config :digitalblockchain, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
+  config :digitalblockchain, :rc_executable, "/usr/local/bin/rcnode"
+
   config :digitalblockchain, DigitalblockchainWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
     http: [

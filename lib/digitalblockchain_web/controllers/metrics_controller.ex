@@ -6,7 +6,7 @@ defmodule DigitalblockchainWeb.MetricsController do
     tmpfile = "/tmp/rc_poll_output.json"
     # System.find_executable("rc") || "/usr/local/bin/rc"
     rc_path = rc_path()
-    Logger.info("Runing rc at #{rc_path}")
+    Logger.info("Runing rcnode at #{rc_path}")
     # Execute rc and redirect output
     {_, exit_code} =
       System.cmd(rc_path, ["--poll"], stderr_to_stdout: false, into: File.stream!(tmpfile))
@@ -31,6 +31,8 @@ defmodule DigitalblockchainWeb.MetricsController do
 
   defp rc_path do
     # Direct path to avoid symlink weirdness
-    "/usr/local/bin/rc"
+    rc_executable = Application.get_env(:digitalblockchain, :rc_executable)
+    rc_path = System.find_executable(rc_executable) || "/usr/local/bin/#{rc_executable}"
+    rc_path
   end
 end

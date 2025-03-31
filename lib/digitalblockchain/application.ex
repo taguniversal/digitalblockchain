@@ -17,6 +17,8 @@ defmodule Digitalblockchain.Application do
       # {Digitalblockchain.Worker, arg},
       {DigitalBlockchain.MKRAND, 0},
       {DigitalBlockchain.RCDaemon, 0},
+      {DigitalBlockchain.OSCListener, name: DigitalBlockchain.OSCListener},
+      {DigitalBlockchain.SCListener, name: DigitalBlockchain.SCListener},
       # Start to serve requests, typically the last entry
       DigitalblockchainWeb.Endpoint
     ]

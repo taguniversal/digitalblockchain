@@ -27,6 +27,9 @@ defmodule Digitalblockchain.RCPoller do
   end
 
   defp rc_path do
-    System.find_executable("rc") || "/app/bin/rc"
+    # Direct path to avoid symlink weirdness
+    rc_executable = Application.get_env(:digitalblockchain, :rc_executable)
+    rc_path = System.find_executable(rc_executable) || "/usr/local/bin/#{rc_executable}"
+    rc_path
   end
 end
