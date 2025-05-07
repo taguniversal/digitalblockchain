@@ -19,6 +19,7 @@ defmodule DigitalblockchainWeb.Router do
 
     get "/", PageController, :home
     live "/block", BlockLive
+    live "/graph", GraphLive
   end
 
   scope "/api", DigitalblockchainWeb do

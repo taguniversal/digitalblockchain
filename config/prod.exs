@@ -17,5 +17,8 @@ config :swoosh, local: false
 # Do not print debug messages in production
 config :logger, level: :info
 
+config :digitalblockchain,
+  rc_executable: System.get_env("RCNODE_PATH") || "/usr/local/bin/rcnode"
+
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.

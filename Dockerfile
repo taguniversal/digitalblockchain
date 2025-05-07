@@ -1,16 +1,3 @@
-# Find eligible builder and runner images on Docker Hub. We use Ubuntu/Debian
-# instead of Alpine to avoid DNS resolution issues in production.
-#
-# https://hub.docker.com/r/hexpm/elixir/tags?page=1&name=ubuntu
-# https://hub.docker.com/_/ubuntu?tab=tags
-#
-# This file is based on these images:
-#
-#   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
-#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20240612-slim - for the release image
-#   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.17.1-erlang-26.2.5-debian-bullseye-20240612-slim
-#
 ARG ELIXIR_VERSION=1.17.1
 ARG OTP_VERSION=26.2.5
 ARG DEBIAN_VERSION=bullseye-20240612-slim
@@ -18,101 +5,90 @@ ARG DEBIAN_VERSION=bullseye-20240612-slim
 ARG BUILDER_IMAGE="hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}"
 ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 
-FROM ${BUILDER_IMAGE} as builder
+FROM ${BUILDER_IMAGE} AS builder
 
-# install build dependencies
-RUN apt-get update -y && apt-get install -y build-essential git make libssl-dev libc6-dev libsqlite3-dev\ 
-    && apt-get clean && rm -f /var/lib/apt/lists/*_*
+# Install build dependencies
+RUN apt-get update -y && apt-get install -y \
+    build-essential git make libssl-dev libc6-dev libsqlite3-dev nodejs npm libxml2-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# prepare build dir
 WORKDIR /app
-RUN mkdir -p /app
-
-# install hex + rebar
-RUN mix local.hex --force && \
-    mix local.rebar --force
-
-# set build ENV
-ENV MIX_ENV="prod"
-
-# install mix dependencies
+ENV MIX_ENV=prod
+# Copy and fetch Elixir deps
 COPY mix.exs mix.lock ./
-RUN mix deps.get --only $MIX_ENV
-RUN mkdir config
+RUN mix local.hex --force && mix local.rebar --force
+RUN mix deps.get
+RUN mkdir -p config
 
-# copy compile-time config files before we compile dependencies
-# to ensure any relevant config change will trigger the dependencies
-# to be re-compiled.
-COPY config/config.exs config/${MIX_ENV}.exs config/
+# Copy configs early
+COPY config/ config/
 RUN mix deps.compile
 
+# Copy source
 COPY priv priv
-
 COPY lib lib
+COPY assets assets/
 
-COPY assets assets
+# Install NPM deps (inside assets)
+WORKDIR /app/assets
+RUN npm install d3 && npm install --legacy-peer-deps
 
-# compile assets
+WORKDIR /app
+# Build assets
 RUN mix assets.deploy
 
-# Compile the release
+# Move back to app dir
+WORKDIR /app
+
+# Compile Elixir app
 RUN mix compile
 
-# Changes to config/runtime.exs don't require recompiling the code
+# Copy runtime config before release
 COPY config/runtime.exs config/
-
 COPY rel rel
 RUN mix release
 
 # Build MKRAND
 RUN git clone https://github.com/taguniversalmachine/MKRAND-1.git /app/lib/c/MKRAND-1
 WORKDIR /app/lib/c/MKRAND-1
-RUN make -f src/Makefile.simple 
+RUN make -f src/Makefile.simple
 
 # Build RC
-RUN git clone https://github.com/taguniversal/rc.git /app/lib/c/rc && echo "YY"
+RUN git clone https://github.com/taguniversal/rc.git /app/lib/c/rc
 WORKDIR /app/lib/c/rc
 RUN make -f Makefile
 
-# start a new build stage so that the final image will only contain
-# the compiled release and other runtime necessities
+# =========================== Runner Stage ===========================
+
 FROM ${RUNNER_IMAGE}
 
 RUN apt-get update -y && \
-  apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates libsqlite3-0 \
-  && apt-get clean && rm -f /var/lib/apt/lists/*_*
+    apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates libsqlite3-0 libxml2 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install fly CLI
+# Install Fly CLI (optional for your infra)
 RUN curl -L https://fly.io/install.sh | sh
 
-# Set the locale
+# Set locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+ENV RCNODE_PATH="/usr/local/bin/rcnode"
 
-WORKDIR "/app"
-RUN chown nobody /app
+WORKDIR /app
+RUN mkdir -p /app /app/state /app/inv
+RUN chown -R nobody:root /app
 
-# set runner ENV
 ENV MIX_ENV="prod"
 
-# Only copy the final release from the build stage
-COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/digitalblockchain ./
-
+# Only copy needed artifacts
+COPY --from=builder --chown=nobody:root /app/_build/prod/rel/digitalblockchain ./ 
 COPY --from=builder --chown=nobody:root /app/lib/c/MKRAND-1/mkrand /usr/local/bin/
-
-# Install rc
 COPY --from=builder --chown=nobody:root /app/lib/c/rc/build/rcnode /usr/local/bin/
 COPY --from=builder --chown=nobody:root /app/lib/c/rc/inv/ /app/inv/
 
-
 USER nobody
-
-# If using an environment that doesn't automatically reap zombie processes, it is
-# advised to add an init process such as tini via `apt-get install`
-# above and adding an entrypoint. See https://github.com/krallin/tini for details
-# ENTRYPOINT ["/tini", "--"]
 
 CMD ["/app/bin/server"]

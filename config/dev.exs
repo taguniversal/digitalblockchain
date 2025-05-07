@@ -19,6 +19,9 @@ config :digitalblockchain, DigitalblockchainWeb.Endpoint,
     tailwind: {Tailwind, :install_and_run, [:digitalblockchain, ~w(--watch)]}
   ]
 
+config :digitalblockchain,
+  rc_executable: System.get_env("RCNODE_PATH") || "/usr/local/bin/rcnode"
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed
