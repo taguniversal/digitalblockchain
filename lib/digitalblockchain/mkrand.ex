@@ -11,17 +11,28 @@ defmodule DigitalBlockchain.MKRAND do
 
   @impl true
   def handle_call(:rand, _from, _seed) do
-    {result, exit_status} = System.cmd("mkrand", ["-f8"])
+    seed =
+      DateTime.utc_now()
+      |> DateTime.to_iso8601()
+
+    {result, exit_status} =
+      System.cmd(
+        "mkrand",
+        ["--format", "psi", "--seed", seed]
+      )
+
     result = String.trim(result)
-    Logger.info("System call result: #{result}, exit_Status: #{exit_status}")
+
+    Logger.info("MKRAND seed=#{seed} result=#{result} exit_status=#{exit_status}")
+
     {:reply, result, 0}
   end
 
   def handle_call({:block, seed, num_blocks}, _from, _state) do
-    {result, exit_status} = System.cmd("mkrand", ["-f8", "-n#{num_blocks}", "-s#{seed}"])
+    {result, exit_status} = System.cmd("mkrand", ["--format", "psi", "-n","#{num_blocks}", "-s","#{seed}"])
 
     Logger.info(
-      "System call with seed #{seed} and num_blocks #{num_blocks}: #{result}, exitSttus: #{exit_status}"
+      "System call with seed #{seed} and blocks #{num_blocks}: #{result}, exitSttus: #{exit_status}"
     )
 
     result = String.split(result, "\n")

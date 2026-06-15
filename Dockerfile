@@ -21,8 +21,9 @@ ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 FROM ${BUILDER_IMAGE} as builder
 
 # install build dependencies
-RUN apt-get update -y && apt-get install -y build-essential git make\
+RUN apt-get update -y && apt-get install -y build-essential git make curl xz-utils\
     && apt-get clean && rm -f /var/lib/apt/lists/*_*
+
 
 # prepare build dir
 WORKDIR /app
@@ -49,9 +50,6 @@ COPY priv priv
 
 COPY lib lib
 
-#compile MKRAND
-WORKDIR /app/lib/c/MKRAND-1 
-#RUN make -f src/Makefile.simple
 WORKDIR /app
 
 COPY assets assets
@@ -68,10 +66,7 @@ COPY config/runtime.exs config/
 COPY rel rel
 RUN mix release
 
-# Build MKRAND
-RUN git clone https://github.com/taguniversalmachine/MKRAND-1.git /app/lib/c/MKRAND-1
-WORKDIR /app/lib/c/MKRAND-1
-RUN make -f src/Makefile.simple 
+WORKDIR /app
 
 # start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
@@ -80,6 +75,12 @@ FROM ${RUNNER_IMAGE}
 RUN apt-get update -y && \
   apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates \
   && apt-get clean && rm -f /var/lib/apt/lists/*_*
+
+
+# Install mkrand and mkstorm binaries
+COPY priv/bin/mkrand /usr/local/bin/mkrand
+COPY priv/bin/mkstorm /usr/local/bin/mkstorm
+RUN chmod +x /usr/local/bin/mkrand /usr/local/bin/mkstorm
 
 # Set the locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
@@ -97,8 +98,7 @@ ENV MIX_ENV="prod"
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/prod/rel/digitalblockchain ./
 RUN find /app/bin /app/releases -type f -exec sed -i 's/\r$//' {} \;
-COPY --from=builder --chown=nobody:root /app/lib/c/MKRAND-1/mkrand /usr/local/bin/
-
+COPY --from=builder --chown=nobody:root /app/priv/bin/mkrand /app/priv/bin/mkstorm /usr/local/bin/
 USER nobody
 
 # If using an environment that doesn't automatically reap zombie processes, it is

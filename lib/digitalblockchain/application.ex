@@ -16,6 +16,7 @@ defmodule Digitalblockchain.Application do
       # Start a worker by calling: Digitalblockchain.Worker.start_link(arg)
       # {Digitalblockchain.Worker, arg},
       {DigitalBlockchain.MKRAND, 0},
+      {DigitalBlockchain.MKSTORM, []},
       # Start to serve requests, typically the last entry
       DigitalblockchainWeb.Endpoint
     ]
