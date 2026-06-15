@@ -1,92 +1,92 @@
 <div class="flex flex-col gap-4">
 
 
-<div class="rounded-lg border border-slate-300 bg-slate-50 p-4 my-4 text-slate-800">
-  <h2 class="text-lg font-bold mb-2">
-    How to Test the Digital Blockchain Demo
-  </h2>
+<div class="rounded-xl border border-slate-200 bg-white shadow-sm p-4 my-4">
+  <div class="flex flex-col gap-3">
+    <div>
+      <h2 class="text-base font-bold text-slate-900">
+        Digital Blockchain Demo
+      </h2>
+      <p class="text-sm text-slate-600">
+        A Genesis Block regenerates the same chain. Saved memos reappear when the same chain is rebuilt.
+      </p>
+    </div>
 
-  <p class="mb-3">
-    This page demonstrates deterministic blockchain continuation. A Genesis Block
-    can recreate the same chain later, including memo text attached to specific blocks.
-  </p>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+      <div class="rounded bg-slate-50 border p-2">
+        <strong>1.</strong> Create or paste a Genesis Block.
+      </div>
+      <div class="rounded bg-slate-50 border p-2">
+        <strong>2.</strong> Generate blocks.
+      </div>
+      <div class="rounded bg-slate-50 border p-2">
+        <strong>3.</strong> Select blocks and save memos.
+      </div>
+      <div class="rounded bg-slate-50 border p-2">
+        <strong>4.</strong> Reopen, paste, regenerate, and recover.
+      </div>
+    </div>
 
-  <ol class="list-decimal list-inside space-y-2">
-    <li>
-      Click <strong>Genesis Block</strong> to generate a new starting block.
-    </li>
-
-    <li>
-      Copy the Genesis Block value.
-    </li>
-
-    <li>
-      Generate a chain of blocks.
-    </li>
-
-    <li>
-      Click a block and enter memo text in the memo box.
-    </li>
-
-    <li>
-      Save memos on one or more blocks.
-    </li>
-
-    <li>
-      Generate a new chain, or open this page in a second browser tab.
-    </li>
-
-    <li>
-      Paste the copied Genesis Block.
-    </li>
-
-    <li>
-      Generate the chain again and watch the same blocks reappear with their saved memo text.
-    </li>
-  </ol>
-
-  <p class="mt-3 text-sm text-slate-600">
-    The Genesis Block acts as a deterministic continuation key. Given the same Genesis Block,
-    MKRAND regenerates the same chain, while MKSTORM restores memo records associated with
-    the matching block identifiers.
-  </p>
+    <p class="text-xs text-slate-500">
+      MKRAND recreates the deterministic chain. MKSTORM restores memo records attached to matching block IDs.
+    </p>
+  </div>
 </div>
-  <button
-    phx-click="new_genesis"
-    class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-  >
-    Genesis Block
-  </button>
 
-  <div class="flex space-x-1">
-    <div class="w-1/10  p-2">
-      <a id="clipboard-copy" data-content={@genesis} phx-hook="ClipboardCopy">
+<div class="flex flex-col gap-3 my-4">
+  <div class="flex flex-wrap items-center gap-2">
+    <button
+      phx-click="new_genesis"
+      class="bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      Genesis Block
+    </button>
+
+    <button
+      phx-click="gen"
+      phx-value-num_blocks="20"
+      class="bg-emerald-600 text-white font-semibold py-2 px-4 rounded hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+    >
+      Generate
+    </button>
+
+    <div class="flex items-center gap-1">
+      <a
+        id="clipboard-copy"
+        data-content={@genesis}
+        phx-hook="ClipboardCopy"
+        class="cursor-pointer rounded border bg-slate-50 p-2 hover:bg-slate-100"
+        title="Copy Genesis Block"
+      >
         <svg
-          class="w-6 h-6"
+          class="w-5 h-5"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="size-6"
         >
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
-            d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"
+            d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z"
           />
         </svg>
       </a>
-    </div>
-    <div class="w-1/10  p-2">
-      <a id="clipboard-paste" phx-hook="ClipboardPaste">
+
+      <a
+        id="clipboard-paste"
+        phx-hook="ClipboardPaste"
+        class="cursor-pointer rounded border bg-slate-50 p-2 hover:bg-slate-100"
+        title="Paste Genesis Block"
+      >
         <svg
+          class="w-5 h-5"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          class="size-6"
         >
           <path
             stroke-linecap="round"
@@ -96,19 +96,20 @@
         </svg>
       </a>
     </div>
-    <div id="genesis-block" class="w-9/10 p-2"><%= @genesis %></div>
   </div>
+
+  <div
+    id="genesis-block"
+    class="font-mono text-xs md:text-sm break-all rounded-lg border border-slate-200 bg-slate-950 text-emerald-300 p-3"
+  >
+    <%= @genesis %>
+  </div>
+
+  <p class="text-xs text-slate-500">
+    Copy this Genesis Block to recover the same deterministic chain later.
+  </p>
 </div>
-<p></p>
-Copy your Genesis Block and keep it safe, use it to access your blockchain later.
-<p></p>
-<button
-  phx-click="gen"
-  phx-value-num_blocks="20"
-  class="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
->
-  Generate
-</button>
+
 
 <table class="min-w-full divide-y divide-gray-200">
   <thead class="bg-gray-50">
@@ -141,3 +142,4 @@ Copy your Genesis Block and keep it safe, use it to access your blockchain later
     <% end %>
   </tbody>
 </table>
+</div>

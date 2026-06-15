@@ -1,12 +1,12 @@
 defmodule DigitalBlockchain.MKSTORM do
   use GenServer
   require Logger
-
+  @mkstorm_storage_path "/tmp/mkstorm"
   # Callbacks
   @impl true
-  def init(state) do
+  def init(_state) do
     Logger.info("MKSTORM init")
-    {:ok, state}
+    {:ok, %{records: []}}
   end
 
   @impl true
@@ -28,71 +28,51 @@ defmodule DigitalBlockchain.MKSTORM do
     GenServer.call(__MODULE__, {:ingest, block, long_count, short_count, payload})
   end
 
+  defp store_path do
+    System.get_env("MKSTORM_STORE_PATH", @mkstorm_storage_path)
+  end
+
   @impl true
   def handle_call({:query, block}, _from, state) do
-    {result, exit_status} =
-      System.cmd(
-        "mkstorm",
-        ["--store",
-        System.get_env("MKSTORM_STORE_PATH", "/data"),"--query", block]
-      )
-
-    Logger.info("MKSTORM query block=#{block} exit_status=#{exit_status}")
-
     records =
-      result
-      |> String.split(~r/\r?\n/)
-      |> Enum.map(&String.trim/1)
-      |> Enum.reject(&(&1 == ""))
-      |> Enum.map(fn line ->
-        case Jason.decode(line) do
-          {:ok, json} -> json
-          {:error, _} -> %{"raw" => line}
-        end
+      state.records
+      |> Enum.filter(fn record ->
+        record["psi"] == block or record["index"] == block
       end)
+      |> Enum.reverse()
 
     {:reply, records, state}
   end
 
   defp do_ingest(block, long_count, short_count, payload, _from, state) do
-    {result, exit_status} =
-      System.cmd("mkstorm", [
-        "--store",
-        System.get_env("MKSTORM_STORE_PATH", "/data"),
-        block,
-        to_string(long_count),
-        to_string(short_count),
-        payload
-      ])
-
-    Logger.info("MKSTORM block=#{block} payload=#{payload} exit_status=#{exit_status}")
-
-    lines =
-      result
-      |> String.split(~r/\r?\n/)
-      |> Enum.map(&String.trim/1)
-      |> Enum.reject(&(&1 == ""))
-
-    parsed =
-      Enum.reduce(lines, %{}, fn line, acc ->
-        case String.split(line, ":", parts: 2) do
-          [key, value] ->
-            Map.put(acc, String.trim(key), String.trim(value))
-
-          _ ->
-            acc
-        end
-      end)
-
     record = %{
-      originator: Map.get(parsed, "originator"),
-      index: Map.get(parsed, "index"),
-      long_count: parsed |> Map.get("long_count", "0") |> String.to_integer(),
-      short_count: parsed |> Map.get("short_count", "0") |> String.to_integer(),
-      payload: Map.get(parsed, "payload")
+      "originator" => "local",
+      "psi" => block,
+      "index" => block,
+      "long_count" => long_count,
+      "short_count" => short_count,
+      "payload" => payload
     }
 
-    {:reply, record, state}
+    args = [
+      "--store",
+      store_path(),
+      block,
+      to_string(long_count),
+      to_string(short_count),
+      payload
+    ]
+
+    Logger.info("MKSTORM ingest args=#{inspect(args)}")
+
+    {result, exit_status} =
+      System.cmd("mkstorm", args, stderr_to_stdout: true)
+
+    Logger.info("MKSTORM ingest result=#{inspect(result)} exit_status=#{exit_status}")
+
+    new_state = %{state | records: [record | state.records]}
+
+    {:reply, record, new_state}
   end
 
   # Public API
